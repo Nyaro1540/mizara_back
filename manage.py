@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 #!/usr/bin/env python3
+=======
+#!/usr/bin/env python
+>>>>>>> c3b8296 (Mise en place de l'authetification des user)
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
@@ -6,7 +10,11 @@ import sys
 
 def main():
     """Run administrative tasks."""
+<<<<<<< HEAD
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'Mi.settings')
+=======
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'mizara.settings')
+>>>>>>> c3b8296 (Mise en place de l'authetification des user)
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
