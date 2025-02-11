@@ -12,7 +12,7 @@ from random import randint
 # 📌 1. Inscription (Register)
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
-    serializer_class = utilisateursSerializer
+    serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):

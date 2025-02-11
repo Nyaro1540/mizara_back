@@ -41,16 +41,19 @@ INSTALLED_APPS = [
     'rest_framework', 
     'utilisateurs',
     'rest_framework_simplejwt',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    
 ]
 
 ROOT_URLCONF = 'mizara.urls'
@@ -145,3 +148,7 @@ SIMPLE_JWT = {
     "VERIFYING_KEY": None,
     "TOKEN_USER_CLASS": "users.models.User",
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # Ajoutez l'URL de votre application Flutter
+]
