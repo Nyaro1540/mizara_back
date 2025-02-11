@@ -5,7 +5,7 @@ from .models import utilisateurs
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'nom_complet', 'numero_telephone', 'email', 'lieu_habitation', 'role']
+        fields = ['id', 'nom_complet', 'prenom', 'numero_telephone', 'email', 'lieu_habitation', 'role']
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])
@@ -13,7 +13,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['nom_complet', 'numero_telephone', 'email', 'lieu_habitation', 'password', 'password2']
+        fields = ['nom_complet', 'prenom', 'numero_telephone', 'email', 'lieu_habitation', 'password', 'password2']
 
     def validate(self, attrs):
         if attrs['password'] != attrs['password2']:

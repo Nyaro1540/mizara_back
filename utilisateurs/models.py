@@ -12,6 +12,7 @@ class User(AbstractUser):
         ('agent', 'Agent de réception'),
     ]
     nom_complet = models.CharField(max_length=255)
+    prenom = models.CharField(max_length=255)  # Ajout du champ prenom
     numero_telephone = models.CharField(max_length=15, unique=True)
     email = models.EmailField(unique=True, blank=True, null=True)
     lieu_habitation = models.CharField(max_length=255)
