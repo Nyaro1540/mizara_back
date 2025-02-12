@@ -8,10 +8,11 @@ from .models import utilisateurs
 from .serializers import UserSerializer, RegisterSerializer
 from django.core.mail import send_mail
 from random import randint
+from django.utils import timezone
 
 # 📌 1. Inscription (Register)
 class RegisterView(generics.CreateAPIView):
-    queryset = User.objects.all()
+    queryset = utilisateurs.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
@@ -26,13 +27,13 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        phone_number = request.data.get("phone_number")
+        numero_telephone = request.data.get("phone_number")
         password = request.data.get("password")
 
-        if not phone_number or not password:
+        if not numero_telephone or not password:
             return Response({"error": "Numéro de téléphone et mot de passe requis."}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = authenticate(phone_number=phone_number, password=password)
+        user = authenticate(numero_telephone=numero_telephone, password=password)
 
         if user is not None:
             refresh = RefreshToken.for_user(user)
@@ -62,15 +63,15 @@ class PasswordResetRequestView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        phone_number = request.data.get("phone_number")
+        numero_telephone = request.data.get("phone_number")
         email = request.data.get("email")
 
-        if not phone_number and not email:
+        if not numero_telephone and not email:
             return Response({"error": "Numéro de téléphone ou adresse e-mail requis."}, status=status.HTTP_400_BAD_REQUEST)
 
         user = None
-        if phone_number:
-            user = utilisateurs.objects.filter(phone_number=phone_number).first()
+        if numero_telephone:
+            user = utilisateurs.objects.filter(numero_telephone=numero_telephone).first()
         elif email:
             user = utilisateurs.objects.filter(email=email).first()
 
@@ -81,7 +82,7 @@ class PasswordResetRequestView(APIView):
         user.set_verification_code()
 
         # Envoyer le code par SMS ou e-mail
-        if phone_number:
+        if numero_telephone:
             # Envoyer le code par SMS (implémentation dépendante de votre fournisseur de SMS)
             pass
         elif email:
@@ -99,7 +100,7 @@ class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        phone_number = request.data.get("phone_number")
+        numero_telephone = request.data.get("numero_telephone")
         email = request.data.get("email")
         verification_code = request.data.get("verification_code")
         new_password = request.data.get("new_password")
@@ -108,8 +109,8 @@ class PasswordResetConfirmView(APIView):
             return Response({"error": "Code de vérification et nouveau mot de passe requis."}, status=status.HTTP_400_BAD_REQUEST)
 
         user = None
-        if phone_number:
-            user = utilisateurs.objects.filter(phone_number=phone_number, verification_code=verification_code).first()
+        if numero_telephone:
+            user = utilisateurs.objects.filter(numero_telephone=numero_telephone, verification_code=verification_code).first()
         elif email:
             user = utilisateurs.objects.filter(email=email, verification_code=verification_code).first()
 
