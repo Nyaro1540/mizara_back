@@ -4,7 +4,7 @@ from .models import utilisateurs
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
+        model = utilisateurs
         fields = ['id', 'nom_complet', 'prenom', 'numero_telephone', 'email', 'lieu_habitation', 'role']
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -12,7 +12,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     password2 = serializers.CharField(write_only=True, required=True)
 
     class Meta:
-        model = User
+        model = utilisateurs
         fields = ['nom_complet', 'prenom', 'numero_telephone', 'email', 'lieu_habitation', 'password', 'password2']
 
     def validate(self, attrs):
@@ -22,5 +22,5 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         validated_data.pop('password2')  # On enlève le champ password2
-        user = User.objects.create_user(**validated_data)
+        user = utilisateurs.objects.create_user(**validated_data)
         return user
