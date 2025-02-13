@@ -18,7 +18,6 @@ class User(AbstractUser):
     email = models.EmailField(unique=True, blank=True, null=True)
     lieu_habitation = models.CharField(max_length=255)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='client')
-    numero_telephone = models.CharField(max_length=15, unique=True, null=True, blank=True)
     verification_code = models.IntegerField(null=True, blank=True)
     verification_code_expiry = models.DateTimeField(null=True, blank=True)
     verification_attempts = models.IntegerField(default=0)

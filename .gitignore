@@ -1,0 +1,8 @@
+echo "db.sqlite3" >> .gitignore
+git rm --cached db.sqlite3  # Supprime du suivi sans supprimer le fichier
+git commit -m "Supprime db.sqlite3 du suivi Git"
+db.sqlite3
+*.pyc
+__pycache__/
+venv/
+db.sqlite3
