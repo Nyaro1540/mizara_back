@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'utilisateurs',
     'rest_framework_simplejwt',
     'corsheaders',
+    'marketplace',
 ]
 
 MIDDLEWARE = [

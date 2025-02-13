@@ -69,3 +69,7 @@ class BlacklistedToken(models.Model):
     def is_blacklisted(cls, token):
         """Vérifie si un token est dans la liste noire"""
         return cls.objects.filter(token=str(token)).exists()
+
+class Utilisateurs(models.Model):
+    # Your Utilisateurs model fields here
+    pass
