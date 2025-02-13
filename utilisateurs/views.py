@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import utilisateurs
+from .models import User
 from .serializers import UserSerializer, RegisterSerializer
 from django.core.mail import send_mail
 from random import randint
@@ -12,7 +12,7 @@ from django.utils import timezone
 
 # 📌 1. Inscription (Register)
 class RegisterView(generics.CreateAPIView):
-    queryset = utilisateurs.objects.all()
+    queryset = User.objects.all()
     serializer_class = RegisterSerializer
     permission_classes = [AllowAny]
 
@@ -71,9 +71,9 @@ class PasswordResetRequestView(APIView):
 
         user = None
         if numero_telephone:
-            user = utilisateurs.objects.filter(numero_telephone=numero_telephone).first()
+            user = User.objects.filter(numero_telephone=numero_telephone).first()
         elif email:
-            user = utilisateurs.objects.filter(email=email).first()
+            user = User.objects.filter(email=email).first()
 
         if user is None:
             return Response({"error": "Utilisateur non trouvé."}, status=status.HTTP_404_NOT_FOUND)
@@ -110,9 +110,9 @@ class PasswordResetConfirmView(APIView):
 
         user = None
         if numero_telephone:
-            user = utilisateurs.objects.filter(numero_telephone=numero_telephone, verification_code=verification_code).first()
+            user = User.objects.filter(numero_telephone=numero_telephone, verification_code=verification_code).first()
         elif email:
-            user = utilisateurs.objects.filter(email=email, verification_code=verification_code).first()
+            user = User.objects.filter(email=email, verification_code=verification_code).first()
 
         if user is None:
             return Response({"error": "Code de vérification invalide ou utilisateur non trouvé."}, status=status.HTTP_404_NOT_FOUND)
