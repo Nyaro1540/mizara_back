@@ -7,6 +7,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .managers import UserManager
 
 class User(AbstractUser):
+    username = None
     ROLE_CHOICES = [
         ('client', 'Client'),
         ('collecteur', 'Collecteur'),
@@ -23,7 +24,7 @@ class User(AbstractUser):
     verification_attempts = models.IntegerField(default=0)
     
     USERNAME_FIELD = 'numero_telephone'
-    REQUIRED_FIELDS = ['nom_complet', 'email']
+    REQUIRED_FIELDS = ['nom_complet', 'email', 'prenom', 'lieu_habitation']
 
     objects = UserManager()
 

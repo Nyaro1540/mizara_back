@@ -7,31 +7,24 @@ For more information on this file, see
 https://docs.djangoproject.com/en/5.1/topics/settings/
 
 For the full list of settings and their values, see
-https://docs.djangoproject.com/en/5.1/ref/settings/
-"""
+https://docs.djangoproject.com/en/5.1/ref/settings/"""
 
 from pathlib import Path
 import os
-from datetime import timedelta #pour la securisation des sesion de connexion et d'inscription et de deconnexion
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
+from datetime import timedelta
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-39rn+opn=^zqb^z2(^(911_t=ro&a^)@7w-zy=u%p_8cfw*zs4'
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "192.168.1.178", "localhost", "127.0.0.1"
+    "192.168.1.178", 
+    "localhost", 
+    "127.0.0.1",
+    "10.0.2.2"  # Ajout pour support Android Emulator
 ]
-
-
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -56,7 +49,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
 ]
 
 ROOT_URLCONF = 'mizara.urls'
@@ -79,10 +71,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'mizara.wsgi.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -94,10 +82,6 @@ DATABASES = {
     }
 }
 
-
-# Password validation
-# https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
-
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
@@ -108,10 +92,6 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-
-# Internationalization
-# https://docs.djangoproject.com/en/5.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -120,14 +100,7 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.1/howto/static-files/
-
 STATIC_URL = 'static/'
-
-# Default primary key field type
-# https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'utilisateurs.User'
@@ -139,21 +112,55 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),  # Token expire après 5 min
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),  # Refresh token dure 7 jours
-    "ROTATE_REFRESH_TOKENS": True,  # Génère un nouveau refresh token à chaque utilisation
-    "BLACKLIST_AFTER_ROTATION": True,  # Blackliste l’ancien refresh token
-    "AUTH_HEADER_TYPES": ("Bearer",),  # Format attendu: Authorization: Bearer <token>
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+    "ROTATE_REFRESH_TOKENS": True,
+    "BLACKLIST_AFTER_ROTATION": True,
+    "AUTH_HEADER_TYPES": ("Bearer",),
     "USER_ID_FIELD": "id",
     "USER_ID_CLAIM": "user_id",
-    "SIGNING_KEY": SECRET_KEY,  # Clé secrète pour signer les tokens
-    "ALGORITHM": "HS256",  # Algorithme de signature
+    "SIGNING_KEY": SECRET_KEY,
+    "ALGORITHM": "HS256",
     "VERIFYING_KEY": None,
     "TOKEN_USER_CLASS": "users.models.User",
 }
 
 CORS_ALLOWED_ORIGINS = [
+    "http://localhost",
+    "http://127.0.0.1",
     "http://localhost:3000",
-    "http://localhost:8000",
+    "http://localhost:8000", 
+    "http://127.0.0.1:8000",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
     "http://192.168.1.234",
+    "http://192.168.1.234:8080",
+    # Ajout pour support Flutter
+    "http://10.0.2.2",  # Adresse spéciale pour Android Emulator
+    "http://10.0.2.2:8000",
+    "http://localhost:8081",  # Port par défaut de Flutter
+    "http://127.0.0.1:8081"
 ]
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CORS_ALLOW_CREDENTIALS = True

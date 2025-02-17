@@ -27,24 +27,37 @@ class LoginView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        numero_telephone = request.data.get("phone_number")
+        identifier = request.data.get("identifier")  # Peut être email ou numéro de téléphone
         password = request.data.get("password")
 
-        if not numero_telephone or not password:
-            return Response({"error": "Numéro de téléphone et mot de passe requis."}, status=status.HTTP_400_BAD_REQUEST)
+        if not identifier or not password:
+            return Response({"error": "Email/Numéro de téléphone et mot de passe requis."}, status=status.HTTP_400_BAD_REQUEST)
 
-        user = authenticate(numero_telephone=numero_telephone, password=password)
+        # Essayer d'authentifier avec email ou numéro de téléphone
+        user = None
+        try:
+            if '@' in identifier:  # Si c'est un email
+                user = User.objects.filter(email=identifier).first()
+            else:  # Si c'est un numéro de téléphone
+                user = User.objects.filter(numero_telephone=identifier).first()
 
-        if user is not None:
-            refresh = RefreshToken.for_user(user)
-            return Response(
-                {
-                    "access": str(refresh.access_token),
-                    "refresh": str(refresh),
-                },
-                status=status.HTTP_200_OK,
-            )
-        return Response({"error": "Identifiants invalides."}, status=status.HTTP_401_UNAUTHORIZED)
+            if user and user.check_password(password):
+                refresh = RefreshToken.for_user(user)
+                return Response(
+                    {
+                        "access": str(refresh.access_token),
+                        "refresh": str(refresh),
+                        "user": {
+                            "id": user.id,
+                            "nom_complet": user.nom_complet,
+                            "role": user.role
+                        }
+                    },
+                    status=status.HTTP_200_OK,
+                )
+            return Response({"error": "Identifiants invalides."}, status=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            return Response({"error": "Une erreur s'est produite lors de l'authentification."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # 📌 3. Déconnexion (Logout)
 class LogoutView(APIView):
