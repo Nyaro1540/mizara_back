@@ -165,11 +165,20 @@ CORS_ALLOW_HEADERS = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-# Configuration SMTP pour l'envoi d'emails
+# Configuration SMTP pour Mailtrap
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
+EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
+EMAIL_PORT = 2525
+EMAIL_HOST_USER = 'Aro Andria'  # Remplacez par votre username Mailtrap
+EMAIL_HOST_PASSWORD = '12fe1855e75bda'  # Remplacez par votre password Mailtrap
+DEFAULT_FROM_EMAIL = 'nyaro15400@gmail.com'  # Email d'expéditeur
+
+# Configuration supplémentaire
+EMAIL_TIMEOUT = 30  # Augmentation du timeout à 30 secondes
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'votre_email@gmail.com'  # Remplacez par votre adresse Gmail
-EMAIL_HOST_PASSWORD = 'votre_mot_de_passe'  # Remplacez par votre mot de passe d'application
-DEFAULT_FROM_EMAIL = 'votre_email@gmail.com'  # Remplacez par votre adresse Gmail
+EMAIL_USE_SSL = False
+
+# Options de débogage
+EMAIL_DEBUG = DEBUG  # Active le débogage en mode développement
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Affiche les emails dans la console

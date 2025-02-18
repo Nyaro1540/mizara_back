@@ -97,19 +97,36 @@ class PasswordResetRequestView(APIView):
         user.set_verification_code()
 
         # Envoyer le code par SMS ou e-mail
-        if numero_telephone:
-            # Envoyer le code par SMS (implémentation dépendante de votre fournisseur de SMS)
-            pass
-        elif email:
-            send_mail(
-                'Réinitialisation de mot de passe',
-                f'Votre code de vérification est {user.verification_code}',
-                'noreply@votresite.com',
-                [email],
-                fail_silently=False,
-            )
+        try:
+            if numero_telephone:
+                # Envoyer le code par SMS (implémentation dépendante de votre fournisseur de SMS)
+                pass
+            elif email:
+                send_mail(
+                    'Réinitialisation de mot de passe',
+                    f'Votre code de vérification est {user.verification_code}',
+                    'noreply@votresite.com',
+                    [email],
+                    fail_silently=False,
+                )
+            
+            # Limiter les tentatives de réinitialisation
+            if user.verification_attempts >= 5:
+                return Response({"error": "Nombre maximum de tentatives atteint. Veuillez réessayer plus tard."}, 
+                            status=status.HTTP_429_TOO_MANY_REQUESTS)
 
-        return Response({"message": "Code de vérification envoyé."}, status=status.HTTP_200_OK)
+            return Response({
+                "message": "Code de vérification envoyé.",
+                "expires_in": 600  # 10 minutes en secondes
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # Log l'erreur pour le débogage
+            print(f"Erreur lors de l'envoi du code de vérification : {str(e)}")
+            return Response({
+                "error": "Une erreur s'est produite lors de l'envoi du code de vérification",
+                "details": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
@@ -130,18 +147,39 @@ class PasswordResetConfirmView(APIView):
             user = User.objects.filter(email=email, verification_code=verification_code).first()
 
         if user is None:
+            # Incrémenter le compteur de tentatives
+            if user:
+                user.verification_attempts += 1
+                user.save()
             return Response({"error": "Code de vérification invalide ou utilisateur non trouvé."}, status=status.HTTP_404_NOT_FOUND)
 
         if user.verification_code_expiry < timezone.now():
+            user.verification_attempts += 1
+            user.save()
             return Response({"error": "Code de vérification expiré."}, status=status.HTTP_400_BAD_REQUEST)
 
         if user.verification_attempts >= 5:
-            return Response({"error": "Nombre de tentatives dépassé."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "error": "Nombre de tentatives dépassé.",
+                "remaining_time": int((user.verification_code_expiry - timezone.now()).total_seconds())
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
 
-        user.set_password(new_password)
-        user.verification_code = None
-        user.verification_code_expiry = None
-        user.verification_attempts = 0
-        user.save()
+        try:
+            user.set_password(new_password)
+            user.verification_code = None
+            user.verification_code_expiry = None
+            user.verification_attempts = 0
+            user.save()
 
-        return Response({"message": "Mot de passe réinitialisé avec succès."}, status=status.HTTP_200_OK)
+            return Response({
+                "message": "Mot de passe réinitialisé avec succès.",
+                "user_id": user.id
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            # Log l'erreur pour le débogage
+            print(f"Erreur lors de la réinitialisation du mot de passe : {str(e)}")
+            return Response({
+                "error": "Une erreur s'est produite lors de la réinitialisation du mot de passe",
+                "details": str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
