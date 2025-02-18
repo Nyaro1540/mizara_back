@@ -164,3 +164,12 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+
+# Configuration SMTP pour l'envoi d'emails
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'votre_email@gmail.com'  # Remplacez par votre adresse Gmail
+EMAIL_HOST_PASSWORD = 'votre_mot_de_passe'  # Remplacez par votre mot de passe d'application
+DEFAULT_FROM_EMAIL = 'votre_email@gmail.com'  # Remplacez par votre adresse Gmail

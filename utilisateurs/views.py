@@ -87,6 +87,8 @@ class PasswordResetRequestView(APIView):
             user = User.objects.filter(numero_telephone=numero_telephone).first()
         elif email:
             user = User.objects.filter(email=email).first()
+            if user and user.email != email:
+                return Response({"error": "L'adresse email ne correspond pas à celle enregistrée."}, status=status.HTTP_400_BAD_REQUEST)
 
         if user is None:
             return Response({"error": "Utilisateur non trouvé."}, status=status.HTTP_404_NOT_FOUND)
