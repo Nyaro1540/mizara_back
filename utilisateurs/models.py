@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 from datetime import timedelta
 from random import randint
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -69,6 +70,34 @@ class BlacklistedToken(models.Model):
     def is_blacklisted(cls, token):
         """Vérifie si un token est dans la liste noire"""
         return cls.objects.filter(token=str(token)).exists()
+
+class ProfileCollecteur(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile_collecteur')
+    nif = models.CharField(max_length=9, unique=True, verbose_name="Numéro d'Identification Fiscale")
+    stat = models.CharField(max_length=8, unique=True, verbose_name="Numéro STAT")
+    cin = models.CharField(max_length=9, unique=True, verbose_name="Carte d'Identité Nationale")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"Profile Collecteur de {self.user.nom_complet}"
+
+    def clean(self):
+        # Validation du NIF (9 chiffres)
+        if len(self.nif) != 9 or not self.nif.isdigit():
+            raise ValidationError("Le NIF doit contenir exactement 9 chiffres")
+        
+        # Validation du STAT (8 chiffres)
+        if len(self.stat) != 8 or not self.stat.isdigit():
+            raise ValidationError("Le numéro STAT doit contenir exactement 8 chiffres")
+        
+        # Validation du CIN (9 chiffres)
+        if len(self.cin) != 9 or not self.cin.isdigit():
+            raise ValidationError("Le numéro CIN doit contenir exactement 9 chiffres")
+
+    class Meta:
+        verbose_name = "Profil Collecteur"
+        verbose_name_plural = "Profils Collecteurs"
 
 class Utilisateurs(models.Model):
     # Your Utilisateurs model fields here
