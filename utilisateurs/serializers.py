@@ -1,11 +1,18 @@
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from .models import User
+from .models import User, ProfileCollecteur
+
+class ProfileCollecteurSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProfileCollecteur
+        fields = ['nif', 'stat', 'cin']
 
 class UserSerializer(serializers.ModelSerializer):
+    profile_collecteur = ProfileCollecteurSerializer(read_only=True)
+
     class Meta:
         model = User
-        fields = ['id', 'nom_complet', 'prenom', 'numero_telephone', 'email', 'lieu_habitation', 'role']
+        fields = ['id', 'nom_complet', 'prenom', 'numero_telephone', 'email', 'lieu_habitation', 'role', 'profile_collecteur']
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])

@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Utilisateurs
+from .models import User, Utilisateurs, ProfileCollecteur
 
 class CustomUserAdmin(UserAdmin):
     model = User
@@ -23,4 +23,12 @@ class CustomUserAdmin(UserAdmin):
     list_per_page = 25
     show_full_result_count = True
 
+class ProfileCollecteurAdmin(admin.ModelAdmin):
+    list_display = ('user', 'nif', 'stat', 'cin', 'created_at', 'updated_at')
+    search_fields = ('user__nom_complet', 'nif', 'stat', 'cin')
+    list_filter = ('created_at', 'updated_at')
+    readonly_fields = ('created_at', 'updated_at')
+    ordering = ('-created_at',)
+
 admin.site.register(User, CustomUserAdmin)
+admin.site.register(ProfileCollecteur, ProfileCollecteurAdmin)

@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User
-from .serializers import UserSerializer, RegisterSerializer
+from .models import User, ProfileCollecteur
+from .serializers import UserSerializer, RegisterSerializer, ProfileCollecteurSerializer
 from django.core.mail import send_mail
 from random import randint
 from django.utils import timezone
@@ -127,6 +127,50 @@ class PasswordResetRequestView(APIView):
                 "error": "Une erreur s'est produite lors de l'envoi du code de vérification",
                 "details": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class ProfileCollecteurView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            profile = ProfileCollecteur.objects.get(user=request.user)
+            serializer = ProfileCollecteurSerializer(profile)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ProfileCollecteur.DoesNotExist:
+            return Response({"error": "Profil collecteur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request):
+        if request.user.role != 'collecteur':
+            return Response({"error": "Seuls les utilisateurs avec le rôle collecteur peuvent créer un profil"}, 
+                          status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            profile = ProfileCollecteur.objects.get(user=request.user)
+            return Response({"error": "Un profil collecteur existe déjà pour cet utilisateur"}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+        except ProfileCollecteur.DoesNotExist:
+            data = request.data.copy()
+            data['user'] = request.user.id
+            serializer = ProfileCollecteurSerializer(data=data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        if request.user.role != 'collecteur':
+            return Response({"error": "Seuls les utilisateurs avec le rôle collecteur peuvent mettre à jour leur profil"}, 
+                          status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            profile = ProfileCollecteur.objects.get(user=request.user)
+            serializer = ProfileCollecteurSerializer(profile, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except ProfileCollecteur.DoesNotExist:
+            return Response({"error": "Profil collecteur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
 
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
