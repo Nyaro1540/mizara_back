@@ -23,7 +23,10 @@ ALLOWED_HOSTS = [
     "192.168.1.178", 
     "localhost", 
     "127.0.0.1",
-    "10.0.2.2"  # Ajout pour support Android Emulator
+    "10.0.2.2",  # Ajout pour support Android Emulator
+    "192.168.1.*",  # Autoriser toutes les adresses IP locales
+    ".ngrok.io",  # Autoriser toutes les URLs ngrok
+    ".ngrok-free.app"  # Autoriser les nouvelles URLs ngrok
 ]
 
 INSTALLED_APPS = [
@@ -139,7 +142,11 @@ CORS_ALLOWED_ORIGINS = [
     "http://10.0.2.2",  # Adresse spéciale pour Android Emulator
     "http://10.0.2.2:8000",
     "http://localhost:8081",  # Port par défaut de Flutter
-    "http://127.0.0.1:8081"
+    "http://127.0.0.1:8081",
+    "http://192.168.1.*",  # Autoriser toutes les adresses IP locales
+    # Ajout pour support ngrok
+    "https://*.ngrok.io",
+    "https://*.ngrok-free.app"
 ]
 
 CORS_ALLOW_METHODS = [
