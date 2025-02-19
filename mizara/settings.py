@@ -17,7 +17,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-39rn+opn=^zqb^z2(^(911_t=ro&a^)@7w-zy=u%p_8cfw*zs4'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "192.168.1.178", 
@@ -176,16 +176,9 @@ CORS_ALLOW_CREDENTIALS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'sandbox.smtp.mailtrap.io'
 EMAIL_PORT = 2525
-EMAIL_HOST_USER = 'Aro Andria'  # Remplacez par votre username Mailtrap
-EMAIL_HOST_PASSWORD = '12fe1855e75bda'  # Remplacez par votre password Mailtrap
-DEFAULT_FROM_EMAIL = 'nyaro15400@gmail.com'  # Email d'expéditeur
-
-# Configuration supplémentaire
-EMAIL_TIMEOUT = 30  # Augmentation du timeout à 30 secondes
+EMAIL_HOST_USER = 'Aro Andria'
+EMAIL_HOST_PASSWORD = '12fe1855e75bda'
+DEFAULT_FROM_EMAIL = 'nyaro15400@gmail.com'
 EMAIL_USE_TLS = True
 EMAIL_USE_SSL = False
-
-# Options de débogage
-EMAIL_DEBUG = DEBUG  # Active le débogage en mode développement
-if DEBUG:
-    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Affiche les emails dans la console
+EMAIL_TIMEOUT = 30
