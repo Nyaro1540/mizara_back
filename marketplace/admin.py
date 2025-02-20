@@ -3,7 +3,7 @@ from .models import Offre
 
 @admin.register(Offre)
 class OffreAdmin(admin.ModelAdmin):
-    list_display = ('titre', 'type_offre', 'collecteur', 'statut', 'cree_a')
-    list_filter = ('type_offre', 'statut')
-    search_fields = ('titre', 'description', 'collecteur__username')
-    ordering = ('-cree_a',)
+    list_display = ('id', 'producteur', 'titre', 'type_offre', 'prix_kg', 'statut', 'date_creation')
+    list_filter = ('type_offre', 'statut', 'date_creation')
+    search_fields = ('titre', 'producteur__email')
+    ordering = ('-date_creation',)
