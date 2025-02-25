@@ -3,11 +3,8 @@ from utilisateurs.models import User
 
 class Offre(models.Model):
     TYPE_CHOICES = [
-        ('legume', 'Légume'),
-        ('fruit', 'Fruit'),
-        ('viande', 'Viande'),
-        ('poisson', 'Poisson'),
-        ('autre', 'Autre'),
+        ('vente', 'Vente'),
+        ('don', 'Don'),
     ]
 
     STATUT_CHOICES = [
@@ -21,7 +18,7 @@ class Offre(models.Model):
     description = models.TextField()
     image = models.ImageField(upload_to='offres/', blank=True, null=True)
     statut = models.CharField(max_length=20, choices=STATUT_CHOICES, default='active')
-    type_offre = models.CharField(max_length=20, choices=TYPE_CHOICES, default='legume')
+    type_offre = models.CharField(max_length=20, choices=TYPE_CHOICES, default='vente')
     prix_kg = models.DecimalField(max_digits=10, decimal_places=2, help_text="Prix en Ariary par kilogramme")
     date_creation = models.DateTimeField(auto_now_add=True)
     date_modification = models.DateTimeField(auto_now=True)
