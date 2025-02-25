@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'marketplace',
     'utilisateurs',
     'commandes',
+    'paiements',
 ]
 
 MIDDLEWARE = [
