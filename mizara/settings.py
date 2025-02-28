@@ -80,10 +80,10 @@ WSGI_APPLICATION = 'mizara.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'mydatabase',  # Correspond à POSTGRES_DB dans docker-compose.yml
-        'USER': 'myuser',      # Correspond à POSTGRES_USER dans docker-compose.yml
-        'PASSWORD': 'mypassword',  # Correspond à POSTGRES_PASSWORD dans docker-compose.yml
-        'HOST': 'db',          # Nom du service défini dans docker-compose.yml
+        'NAME': 'mizara_db',  # Correspond à POSTGRES_DB dans docker-compose.yml
+        'USER': 'mizara_user',      # Correspond à POSTGRES_USER dans docker-compose.yml
+        'PASSWORD': 'Ariko0340!?',  # Correspond à POSTGRES_PASSWORD dans docker-compose.yml
+        'HOST': 'localhost',          # Nom du service défini dans docker-compose.yml
         'PORT': '5432',
     }
 }
