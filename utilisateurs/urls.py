@@ -8,7 +8,11 @@ from .views import (
     ProfileCollecteurView
 )
 
+from django.urls import path
+from .views import upload_profile_picture  # Assurez-vous que cette vue est définie
+
 urlpatterns = [
+    path('upload-profile-picture/', upload_profile_picture, name='upload_profile_picture'),
     path("register/", RegisterView.as_view(), name="register"),
     path("login/", LoginView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),

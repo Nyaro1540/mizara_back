@@ -2,6 +2,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import api_view
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import User, ProfileCollecteur
@@ -227,3 +228,12 @@ class PasswordResetConfirmView(APIView):
                 "error": "Une erreur s'est produite lors de la réinitialisation du mot de passe",
                 "details": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+@api_view(['POST'])
+def upload_profile_picture(request):
+    user = request.user  # Assurez-vous que l'utilisateur est authentifié
+    if request.method == 'POST':
+        serializer = UserSerializer(user, data=request.data, partial=True)  # Utiliser partial=True pour mettre à jour uniquement la photo
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
