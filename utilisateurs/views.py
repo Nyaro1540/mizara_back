@@ -141,15 +141,39 @@ class ProfileCollecteurView(APIView):
             return Response({"error": "Profil collecteur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request):
-        if request.user.role != 'collecteur':
-            return Response({"error": "Seuls les utilisateurs avec le rôle collecteur peuvent créer un profil"}, 
-                          status=status.HTTP_403_FORBIDDEN)
-
-        try:
-            profile = ProfileCollecteur.objects.get(user=request.user)
+        # Vérifier si un profil collecteur existe déjà
+        profile = ProfileCollecteur.objects.filter(user=request.user).first()
+        if profile:
             return Response({"error": "Un profil collecteur existe déjà pour cet utilisateur"}, 
                           status=status.HTTP_400_BAD_REQUEST)
-        except ProfileCollecteur.DoesNotExist:
+
+        # Récupérer les informations NIF, STAT et CIN
+        nif = request.data.get("nif")
+        stat = request.data.get("stat")
+        cin = request.data.get("cin")
+
+        # Vérifier que les informations sont fournies
+        if not nif or not stat or not cin:
+            return Response({"error": "NIF, STAT et CIN sont requis."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Créer le profil collecteur
+        data = request.data.copy()
+        data['user'] = request.user.id
+        serializer = ProfileCollecteurSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            # Changer le rôle de l'utilisateur en collecteur
+            request.user.role = 'collecteur'
+            request.user.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+        # Vérifier si un profil collecteur existe déjà
+        profile = ProfileCollecteur.objects.filter(user=request.user).first()
+        if profile:
+            return Response({"error": "Un profil collecteur existe déjà pour cet utilisateur"}, 
+                          status=status.HTTP_400_BAD_REQUEST)
             data = request.data.copy()
             data['user'] = request.user.id
             serializer = ProfileCollecteurSerializer(data=data)
