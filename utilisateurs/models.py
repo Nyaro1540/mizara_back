@@ -24,6 +24,7 @@ class User(AbstractUser):
     verification_code_expiry = models.DateTimeField(null=True, blank=True)
     verification_attempts = models.IntegerField(default=0)
     photo_profil = models.ImageField(upload_to='photos_profil/', blank=True, null=True)  # Champ pour la photo de profil
+    is_collecteur_profile_complete = models.BooleanField(default=False)
     
     USERNAME_FIELD = 'numero_telephone'
     REQUIRED_FIELDS = ['nom_complet', 'email', 'prenom', 'lieu_habitation']

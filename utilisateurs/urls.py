@@ -5,7 +5,8 @@ from .views import (
     LogoutView, 
     PasswordResetRequestView, 
     PasswordResetConfirmView,
-    ProfileCollecteurView
+    ProfileCollecteurView,
+    CompleteProfileCollecteurView
 )
 
 from django.urls import path
@@ -19,4 +20,5 @@ urlpatterns = [
     path('password-reset-request/', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
     path('profile-collecteur/', ProfileCollecteurView.as_view(), name='profile_collecteur'),
+    path('complete-profile-collecteur/', CompleteProfileCollecteurView.as_view(), name='complete_profile_collecteur'),
 ]

@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'nom_complet', 'prenom', 'numero_telephone', 'email', 'lieu_habitation', 'role', 'profile_collecteur', 'photo_profil']  # Ajout du champ photo_profil
+        fields = ['id', 'nom_complet', 'prenom', 'numero_telephone', 'email', 'lieu_habitation', 'role', 'profile_collecteur', 'photo_profil', 'is_collecteur_profile_complete']  # Ajout du champ photo_profil
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, required=True, validators=[validate_password])

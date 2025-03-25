@@ -11,7 +11,7 @@ from django.core.mail import send_mail
 from random import randint
 from django.utils import timezone
 
-# 📌 1. Inscription (Register)
+# 1. Inscription (Register)
 class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
@@ -23,7 +23,7 @@ class RegisterView(generics.CreateAPIView):
         user = serializer.save()
         return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
 
-# 📌 2. Connexion (Login)
+# 2. Connexion (Login)
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
@@ -32,7 +32,8 @@ class LoginView(APIView):
         password = request.data.get("password")
 
         if not identifier or not password:
-            return Response({"error": "Email/Numéro de téléphone et mot de passe requis."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Email/Numéro de téléphone et mot de passe requis."}, 
+                          status=status.HTTP_400_BAD_REQUEST)
 
         # Essayer d'authentifier avec email ou numéro de téléphone
         user = None
@@ -58,9 +59,10 @@ class LoginView(APIView):
                 )
             return Response({"error": "Identifiants invalides."}, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
-            return Response({"error": "Une erreur s'est produite lors de l'authentification."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response({"error": "Une erreur s'est produite lors de l'authentification."}, 
+                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-# 📌 3. Déconnexion (Logout)
+# 3. Déconnexion (Logout)
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -73,6 +75,7 @@ class LogoutView(APIView):
         except Exception as e:
             return Response({"error": "Token invalide."}, status=status.HTTP_400_BAD_REQUEST)
 
+# 4. Réinitialisation de mot de passe - Demande
 class PasswordResetRequestView(APIView):
     permission_classes = [AllowAny]
 
@@ -81,7 +84,8 @@ class PasswordResetRequestView(APIView):
         email = request.data.get("email")
 
         if not numero_telephone and not email:
-            return Response({"error": "Numéro de téléphone ou adresse e-mail requis."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Numéro de téléphone ou adresse e-mail requis."}, 
+                          status=status.HTTP_400_BAD_REQUEST)
 
         user = None
         if numero_telephone:
@@ -89,7 +93,8 @@ class PasswordResetRequestView(APIView):
         elif email:
             user = User.objects.filter(email=email).first()
             if user and user.email != email:
-                return Response({"error": "L'adresse email ne correspond pas à celle enregistrée."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"error": "L'adresse email ne correspond pas à celle enregistrée."}, 
+                              status=status.HTTP_400_BAD_REQUEST)
 
         if user is None:
             return Response({"error": "Utilisateur non trouvé."}, status=status.HTTP_404_NOT_FOUND)
@@ -114,7 +119,7 @@ class PasswordResetRequestView(APIView):
             # Limiter les tentatives de réinitialisation
             if user.verification_attempts >= 5:
                 return Response({"error": "Nombre maximum de tentatives atteint. Veuillez réessayer plus tard."}, 
-                            status=status.HTTP_429_TOO_MANY_REQUESTS)
+                              status=status.HTTP_429_TOO_MANY_REQUESTS)
 
             return Response({
                 "message": "Code de vérification envoyé.",
@@ -122,81 +127,13 @@ class PasswordResetRequestView(APIView):
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
-            # Log l'erreur pour le débogage
             print(f"Erreur lors de l'envoi du code de vérification : {str(e)}")
             return Response({
                 "error": "Une erreur s'est produite lors de l'envoi du code de vérification",
                 "details": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class ProfileCollecteurView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        try:
-            profile = ProfileCollecteur.objects.get(user=request.user)
-            serializer = ProfileCollecteurSerializer(profile)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except ProfileCollecteur.DoesNotExist:
-            return Response({"error": "Profil collecteur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
-
-    def post(self, request):
-        # Vérifier si un profil collecteur existe déjà
-        profile = ProfileCollecteur.objects.filter(user=request.user).first()
-        if profile:
-            return Response({"error": "Un profil collecteur existe déjà pour cet utilisateur"}, 
-                          status=status.HTTP_400_BAD_REQUEST)
-
-        # Récupérer les informations NIF, STAT et CIN
-        nif = request.data.get("nif")
-        stat = request.data.get("stat")
-        cin = request.data.get("cin")
-
-        # Vérifier que les informations sont fournies
-        if not nif or not stat or not cin:
-            return Response({"error": "NIF, STAT et CIN sont requis."}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Créer le profil collecteur
-        data = request.data.copy()
-        data['user'] = request.user.id
-        serializer = ProfileCollecteurSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            # Changer le rôle de l'utilisateur en collecteur
-            request.user.role = 'collecteur'
-            request.user.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-        # Vérifier si un profil collecteur existe déjà
-        profile = ProfileCollecteur.objects.filter(user=request.user).first()
-        if profile:
-            return Response({"error": "Un profil collecteur existe déjà pour cet utilisateur"}, 
-                          status=status.HTTP_400_BAD_REQUEST)
-            data = request.data.copy()
-            data['user'] = request.user.id
-            serializer = ProfileCollecteurSerializer(data=data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def put(self, request):
-        if request.user.role != 'collecteur':
-            return Response({"error": "Seuls les utilisateurs avec le rôle collecteur peuvent mettre à jour leur profil"}, 
-                          status=status.HTTP_403_FORBIDDEN)
-
-        try:
-            profile = ProfileCollecteur.objects.get(user=request.user)
-            serializer = ProfileCollecteurSerializer(profile, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except ProfileCollecteur.DoesNotExist:
-            return Response({"error": "Profil collecteur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
-
+# 5. Réinitialisation de mot de passe - Confirmation
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
 
@@ -207,7 +144,8 @@ class PasswordResetConfirmView(APIView):
         new_password = request.data.get("new_password")
 
         if not verification_code or not new_password:
-            return Response({"error": "Code de vérification et nouveau mot de passe requis."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": "Code de vérification et nouveau mot de passe requis."}, 
+                          status=status.HTTP_400_BAD_REQUEST)
 
         user = None
         if numero_telephone:
@@ -216,11 +154,11 @@ class PasswordResetConfirmView(APIView):
             user = User.objects.filter(email=email, verification_code=verification_code).first()
 
         if user is None:
-            # Incrémenter le compteur de tentatives
             if user:
                 user.verification_attempts += 1
                 user.save()
-            return Response({"error": "Code de vérification invalide ou utilisateur non trouvé."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "Code de vérification invalide ou utilisateur non trouvé."}, 
+                          status=status.HTTP_404_NOT_FOUND)
 
         if user.verification_code_expiry < timezone.now():
             user.verification_attempts += 1
@@ -246,17 +184,87 @@ class PasswordResetConfirmView(APIView):
             }, status=status.HTTP_200_OK)
 
         except Exception as e:
-            # Log l'erreur pour le débogage
             print(f"Erreur lors de la réinitialisation du mot de passe : {str(e)}")
             return Response({
                 "error": "Une erreur s'est produite lors de la réinitialisation du mot de passe",
                 "details": str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# 6. Profil Collecteur
+class ProfileCollecteurView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            profile = ProfileCollecteur.objects.get(user=request.user)
+            serializer = ProfileCollecteurSerializer(profile)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ProfileCollecteur.DoesNotExist:
+            return Response({"error": "Profil collecteur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+
+    def post(self, request):
+        profile = ProfileCollecteur.objects.filter(user=request.user).first()
+        if profile:
+            return Response({"error": "Un profil collecteur existe déjà pour cet utilisateur"}, 
+                          status=status.HTTP_400_BAD_REQUEST)
+
+        nif = request.data.get("nif")
+        stat = request.data.get("stat")
+        cin = request.data.get("cin")
+
+        if not nif or not stat or not cin:
+            return Response({"error": "NIF, STAT et CIN sont requis."}, status=status.HTTP_400_BAD_REQUEST)
+
+        data = request.data.copy()
+        data['user'] = request.user.id
+        serializer = ProfileCollecteurSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            request.user.role = 'collecteur'
+            request.user.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def put(self, request):
+        if request.user.role != 'collecteur':
+            return Response({"error": "Seuls les utilisateurs avec le rôle collecteur peuvent mettre à jour leur profil"}, 
+                          status=status.HTTP_403_FORBIDDEN)
+
+        try:
+            profile = ProfileCollecteur.objects.get(user=request.user)
+            serializer = ProfileCollecteurSerializer(profile, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except ProfileCollecteur.DoesNotExist:
+            return Response({"error": "Profil collecteur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+
+# 7. Complétion du profil collecteur
+class CompleteProfileCollecteurView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        if user.role != 'collecteur':
+            return Response({"error": "Seuls les collecteurs peuvent compléter leur profil."}, 
+                          status=status.HTTP_403_FORBIDDEN)
+
+        serializer = ProfileCollecteurSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=user)
+            user.is_collecteur_profile_complete = True
+            user.save()
+            return Response({"message": "Profil collecteur complété avec succès."}, 
+                          status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+# 8. Upload photo de profil
 @api_view(['POST'])
 def upload_profile_picture(request):
-    user = request.user  # Assurez-vous que l'utilisateur est authentifié
+    user = request.user
     if request.method == 'POST':
-        serializer = UserSerializer(user, data=request.data, partial=True)  # Utiliser partial=True pour mettre à jour uniquement la photo
+        serializer = UserSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
