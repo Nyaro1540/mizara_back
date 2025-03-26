@@ -1,9 +1,9 @@
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from utilisateurs.models import User
+from utilisateurs.models import User, ProfileCollecteur
 from .models import Publication, Transaction
-from .serializers import PublicationSerializer, TransactionSerializer
+from .serializers import PublicationSerializer, TransactionSerializer, ProfileCollecteurSerializer # type: ignore
 
 # User Management View
 class UserManagementView(generics.ListAPIView):
@@ -42,3 +42,15 @@ class TransactionManagementView(generics.ListAPIView):
         transactions = self.get_queryset()
         serializer = self.get_serializer(transactions, many=True)
         return Response(serializer.data)
+
+# Collector Profile Creation View
+class ProfileCollecteurCreateView(generics.CreateAPIView):
+    queryset = ProfileCollecteur.objects.all()
+    serializer_class = ProfileCollecteurSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        profile_collecteur = serializer.save()
+        return Response({"message": "Profile Collecteur created successfully"}, status=status.HTTP_201_CREATED)
