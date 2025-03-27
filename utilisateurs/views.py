@@ -33,9 +33,8 @@ class LoginView(APIView):
 
         if not identifier or not password:
             return Response({"error": "Email/Numéro de téléphone et mot de passe requis."}, 
-                          status=status.HTTP_400_BAD_REQUEST)
+                            status=status.HTTP_400_BAD_REQUEST)
 
-        # Essayer d'authentifier avec email ou numéro de téléphone
         user = None
         try:
             if '@' in identifier:  # Si c'est un email
@@ -45,22 +44,23 @@ class LoginView(APIView):
 
             if user and user.check_password(password):
                 refresh = RefreshToken.for_user(user)
-                return Response(
-                    {
-                        "access": str(refresh.access_token),
-                        "refresh": str(refresh),
-                        "user": {
-                            "id": user.id,
-                            "nom_complet": user.nom_complet,
-                            "role": user.role
-                        }
-                    },
-                    status=status.HTTP_200_OK,
-                )
+                response_data = {
+                    "access": str(refresh.access_token),
+                    "refresh": str(refresh),
+                    "user": {
+                        "id": user.id,
+                        "nom_complet": user.nom_complet,
+                        "role": user.role
+                    }
+                }
+                # Ajouter une URL de redirection pour les administrateurs
+                if user.role == 'admin':
+                    response_data["redirect_url"] = "/admin/dashboard/"
+                return Response(response_data, status=status.HTTP_200_OK)
             return Response({"error": "Identifiants invalides."}, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
             return Response({"error": "Une erreur s'est produite lors de l'authentification."}, 
-                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # 3. Déconnexion (Logout)
 class LogoutView(APIView):

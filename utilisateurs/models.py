@@ -13,7 +13,9 @@ class User(AbstractUser):
         ('client', 'Client'),
         ('collecteur', 'Collecteur'),
         ('agent', 'Agent de réception'),
+        ('admin', 'Admin'),  # Nouveau rôle admin
     ]
+
     nom_complet = models.CharField(max_length=255)
     prenom = models.CharField(max_length=255)  # Ajout du champ prenom
     numero_telephone = models.CharField(max_length=15, unique=True)
