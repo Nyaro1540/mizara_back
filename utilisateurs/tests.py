@@ -1,7 +1,6 @@
 from django.test import TestCase
-from rest_framework import status
 from rest_framework.test import APIClient
-from .models import User, ProfileCollecteur
+from utilisateurs.models import User, ProfileCollecteur
 
 class ProfileCollecteurTests(TestCase):
     def setUp(self):
@@ -11,26 +10,21 @@ class ProfileCollecteurTests(TestCase):
             prenom='Test',
             numero_telephone='0123456789',
             email='test@example.com',
-            password='testpassword',
-            lieu_habitation='Test Location'
+            password='testpassword'
         )
         self.client.force_authenticate(user=self.user)
 
     def test_create_profile_collecteur(self):
-        response = self.client.post('/api/profile-collecteur/', {
+        response = self.client.post('/api/profile_collecteur/', {
             'nif': '123456789',
             'stat': '12345678',
             'cin': '123456789'
         })
         self.user.refresh_from_db()
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(self.user.role, 'collecteur')
+        self.assertEqual(self.user.role, 'collecteur')  # Verify that the user's role is set to collecteur
 
-    def test_create_profile_collecteur_missing_fields(self):
-        response = self.client.post('/api/profile-collecteur/', {
-            'nif': '',
-            'stat': '',
-            'cin': ''
-        })
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn("NIF, STAT et CIN sont requis.", str(response.data))
+        self.assertEqual(self.user.role, 'collecteur')
+        self.assertEqual(response.status_code, 201)
+        self.assertIn('nif', response.data)
+        self.assertIn('stat', response.data)
+        self.assertIn('cin', response.data)

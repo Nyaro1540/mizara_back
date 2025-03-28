@@ -197,14 +197,18 @@ class ProfileCollecteurView(APIView):
     def get(self, request):
         try:
             profile = ProfileCollecteur.objects.get(user=request.user)
+            # Vérifier la cohérence du rôle
+            if request.user.role != 'collecteur':
+                request.user.role = 'collecteur'
+                request.user.save()
             serializer = ProfileCollecteurSerializer(profile)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except ProfileCollecteur.DoesNotExist:
             return Response({"error": "Profil collecteur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
 
     def post(self, request):
-        profile = ProfileCollecteur.objects.filter(user=request.user).first()
-        if profile:
+        # Vérifier si l'utilisateur a déjà un profil collecteur
+        if ProfileCollecteur.objects.filter(user=request.user).exists():
             return Response({"error": "Un profil collecteur existe déjà pour cet utilisateur"}, 
                           status=status.HTTP_400_BAD_REQUEST)
 
@@ -218,27 +222,38 @@ class ProfileCollecteurView(APIView):
         data = request.data.copy()
         data['user'] = request.user.id
         serializer = ProfileCollecteurSerializer(data=data)
+        
         if serializer.is_valid():
+            # Sauvegarder le profil collecteur
             serializer.save()
+            # Mettre à jour le rôle de l'utilisateur en 'collecteur' (remplace complètement le rôle précédent)
             request.user.role = 'collecteur'
             request.user.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+            return Response({
+                "message": "Profil collecteur créé avec succès. Votre rôle a été définitivement mis à jour en 'collecteur'.",
+                "data": serializer.data
+            }, status=status.HTTP_201_CREATED)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request):
-        if request.user.role != 'collecteur':
-            return Response({"error": "Seuls les utilisateurs avec le rôle collecteur peuvent mettre à jour leur profil"}, 
-                          status=status.HTTP_403_FORBIDDEN)
-
+        # Vérifier si l'utilisateur a un profil collecteur
         try:
             profile = ProfileCollecteur.objects.get(user=request.user)
-            serializer = ProfileCollecteurSerializer(profile, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except ProfileCollecteur.DoesNotExist:
             return Response({"error": "Profil collecteur non trouvé"}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Mettre à jour le rôle si ce n'est pas déjà fait
+        if request.user.role != 'collecteur':
+            request.user.role = 'collecteur'
+            request.user.save()
+
+        serializer = ProfileCollecteurSerializer(profile, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 # 7. Complétion du profil collecteur
 class CompleteProfileCollecteurView(APIView):
@@ -246,18 +261,18 @@ class CompleteProfileCollecteurView(APIView):
 
     def post(self, request):
         user = request.user
-        if user.role != 'collecteur':
-            return Response({"error": "Seuls les collecteurs peuvent compléter leur profil."}, 
-                          status=status.HTTP_403_FORBIDDEN)
+        # Vérifier si l'utilisateur a un profil collecteur
+        if not ProfileCollecteur.objects.filter(user=user).exists():
+            return Response({"error": "Vous devez d'abord créer un profil collecteur"}, 
+                          status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = ProfileCollecteurSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=user)
-            user.is_collecteur_profile_complete = True
-            user.save()
-            return Response({"message": "Profil collecteur complété avec succès."}, 
-                          status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Mettre à jour le rôle définitivement
+        user.role = 'collecteur'
+        user.save()
+
+        return Response({
+            "message": "Votre profil collecteur est complet. Votre rôle a été définitivement mis à jour en 'collecteur'."
+        }, status=status.HTTP_200_OK)
 
 # 8. Upload photo de profil
 @api_view(['POST'])
