@@ -33,7 +33,7 @@ class LoginView(APIView):
 
         if not identifier or not password:
             return Response({"error": "Email/Numéro de téléphone et mot de passe requis."}, 
-                            status=status.HTTP_400_BAD_REQUEST)
+                          status=status.HTTP_400_BAD_REQUEST)
 
         user = None
         try:
@@ -50,17 +50,22 @@ class LoginView(APIView):
                     "user": {
                         "id": user.id,
                         "nom_complet": user.nom_complet,
-                        "role": user.role
+                        "role": user.role,
+                        "has_completed_profile": ProfileCollecteur.objects.filter(user=user).exists() if user.role == 'collecteur' else True
                     }
                 }
                 # Ajouter une URL de redirection pour les administrateurs
                 if user.role == 'admin':
                     response_data["redirect_url"] = "/admin/dashboard/"
+                # Redirection spéciale pour les collecteurs sans profil complet
+                elif user.role == 'collecteur' and not ProfileCollecteur.objects.filter(user=user).exists():
+                    response_data["redirect_url"] = "/collecteur/dashboard/"
+                    response_data["message"] = "Veuillez compléter votre profil collecteur"
                 return Response(response_data, status=status.HTTP_200_OK)
             return Response({"error": "Identifiants invalides."}, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
             return Response({"error": "Une erreur s'est produite lors de l'authentification."}, 
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                          status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # 3. Déconnexion (Logout)
 class LogoutView(APIView):
