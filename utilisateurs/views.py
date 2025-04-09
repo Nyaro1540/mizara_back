@@ -57,15 +57,43 @@ class LoginView(APIView):
                 # Ajouter une URL de redirection pour les administrateurs
                 if user.role == 'admin':
                     response_data["redirect_url"] = "/admin/dashboard/"
-                # Redirection spéciale pour les collecteurs sans profil complet
-                elif user.role == 'collecteur' and not ProfileCollecteur.objects.filter(user=user).exists():
+                # Redirection pour les collecteurs
+                elif user.role == 'collecteur':
                     response_data["redirect_url"] = "/collecteur/dashboard/"
-                    response_data["message"] = "Veuillez compléter votre profil collecteur"
+                    if not ProfileCollecteur.objects.filter(user=user).exists():
+                        response_data["message"] = "Veuillez compléter votre profil collecteur"
+                    else:
+                        response_data["message"] = "Redirection vers le dashboard collecteur"
                 return Response(response_data, status=status.HTTP_200_OK)
             return Response({"error": "Identifiants invalides."}, status=status.HTTP_401_UNAUTHORIZED)
         except Exception as e:
             return Response({"error": "Une erreur s'est produite lors de l'authentification."}, 
                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+# 2bis. Connexion spécifique pour Collecteur avec vérifications supplémentaires
+class LoginCollecteurView(LoginView):
+    def post(self, request):
+        response = super().post(request)
+        
+        # Si la connexion a réussi (status code 200)
+        if response.status_code == status.HTTP_200_OK:
+            user_data = response.data.get('user', {})
+            user_role = user_data.get('role')
+            
+            # Vérifier si l'utilisateur est bien un collecteur
+            if user_role != 'collecteur':
+                return Response({
+                    "error": "Ce compte n'est pas un compte collecteur. Veuillez utiliser le login standard."
+                }, status=status.HTTP_403_FORBIDDEN)
+                
+            # Vérifier si le profil collecteur est complet
+            if not user_data.get('has_completed_profile', False):
+                return Response({
+                    "error": "Profil collecteur incomplet. Veuillez compléter votre profil avant de vous connecter.",
+                    "redirect_url": "/collecteur/complete-profile/"
+                }, status=status.HTTP_403_FORBIDDEN)
+                
+        return response
 
 # 3. Déconnexion (Logout)
 class LogoutView(APIView):
