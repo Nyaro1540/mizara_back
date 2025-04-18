@@ -16,5 +16,5 @@ COPY . .
 # Exposer le port 8000
 EXPOSE 8000
 
-# Définir la commande pour exécuter le serveur Django
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Définir la commande pour exécuter le serveur Django avec gunicorn
+CMD ["gunicorn", "mizara.wsgi:application", "--bind", "0.0.0.0:8000"]

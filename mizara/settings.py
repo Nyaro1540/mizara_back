@@ -20,17 +20,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-39rn+opn=^zqb^z2(^(911_t=ro&a^)@7w-zy=u%p_8cfw*zs4'
 
-DEBUG = True
+import os
 
-ALLOWED_HOSTS = [
-    "192.168.1.178", 
-    "localhost", 
-    "127.0.0.1",
-    "10.0.2.2",  # Ajout pour support Android Emulator
-    "192.168.1.*",  # Autoriser toutes les adresses IP locales
-    ".ngrok.io",  # Autoriser toutes les URLs ngrok
-    ".ngrok-free.app"  # Autoriser les nouvelles URLs ngrok
-]
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -113,6 +108,8 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = 'static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'utilisateurs.User'
