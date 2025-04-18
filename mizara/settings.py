@@ -12,12 +12,15 @@ https://docs.djangoproject.com/en/5.1/ref/settings/"""
 from pathlib import Path
 import os
 from datetime import timedelta
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = 'django-insecure-39rn+opn=^zqb^z2(^(911_t=ro&a^)@7w-zy=u%p_8cfw*zs4'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "192.168.1.178", 
